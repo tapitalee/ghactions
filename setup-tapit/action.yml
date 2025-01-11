@@ -1,0 +1,16 @@
+name: 'Setup Tapit CLI'
+description: 'Downloads and installs the Tapit CLI'
+author: 'Tapitalee'
+runs:
+  using: 'composite'
+  steps:
+    - name: Install pack
+      uses: buildpacks/github-actions/setup-pack@v5.8.6
+    - name: Download Tapit CLI
+      shell: bash
+      run: |
+        curl --compressed -o tapit https://tapitalee.s3.us-west-2.amazonaws.com/cli/1/linux_amd64/tapit
+        chmod +x tapit
+        mkdir -p $HOME/.local/bin
+        mv tapit $HOME/.local/bin/
+        echo "$HOME/.local/bin" >> $GITHUB_PATH
