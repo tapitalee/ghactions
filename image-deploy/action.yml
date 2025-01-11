@@ -10,7 +10,7 @@ runs:
   using: 'composite'
   steps:
     - name: Setup Tapit CLI
-      uses: ./setup-tapit
+      uses: tapitalee/ghactions/setup-tapit@main
       
     - name: Get Git SHA
       id: git-sha
