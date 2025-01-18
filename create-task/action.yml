@@ -28,4 +28,4 @@ runs:
       env:
         TAPIT_TOKEN: ${{ inputs.tapit-token }}
       run: |
-        tapit create task command="${{ inputs.command }}"  tag="${{ github.ref_name }}" git_hash="${{ github.sha }}" memory="${{ inputs.memory }}" cpu="${{ inputs.cpu }}" -w
+        tapit create task "${{ inputs.command }}" tag="${{ github.ref_name }}" git_hash="${{ github.sha }}" memory="${{ inputs.memory }}" cpu="${{ inputs.cpu }}" -w
