@@ -1,5 +1,5 @@
-name: 'Deploy Image with Tapit'
-description: 'Deploys a container image using Tapit CLI'
+name: 'Build & Deploy Image with Tapit'
+description: 'Builds & deploys a container image using Tapit CLI'
 author: 'Tapitalee'
 inputs:
   tapit-token:
@@ -12,15 +12,9 @@ runs:
     - name: Setup Tapit CLI
       uses: tapitalee/ghactions/setup-tapit@main
       
-    - name: Get Git SHA
-      id: git-sha
-      shell: bash
-      run: |
-        echo "short_sha=$(git rev-parse --short=8 HEAD)" >> $GITHUB_OUTPUT
-        
     - name: Deploy Image
       shell: bash
       env:
         TAPIT_TOKEN: ${{ inputs.tapit-token }}
       run: |
-        tapit image deploy tag=${{ steps.git-sha.outputs.short_sha }}
+        tapit image deploy tag="${{ github.ref_name }}" git_hash="${{ github.sha }}" initiated_by="${{ github.triggering_actor }}"
