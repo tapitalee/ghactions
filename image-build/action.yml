@@ -1,0 +1,20 @@
+name: 'Build Image with Tapit'
+description: 'Builds a container image using Tapit CLI'
+author: 'Tapitalee'
+inputs:
+  tapit-token:
+    description: 'Tapit authentication token'
+    required: true
+
+runs:
+  using: 'composite'
+  steps:
+    - name: Setup Tapit CLI
+      uses: tapitalee/ghactions/setup-tapit@main
+      
+    - name: Build Image
+      shell: bash
+      env:
+        TAPIT_TOKEN: ${{ inputs.tapit-token }}
+      run: |
+        tapit image build tag="${{ github.ref_name }}" git_hash="${{ github.sha }}" initiated_by="${{ github.triggering_actor }}"
