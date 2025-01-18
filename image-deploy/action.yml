@@ -17,4 +17,4 @@ runs:
       env:
         TAPIT_TOKEN: ${{ inputs.tapit-token }}
       run: |
-        tapit image deploy tag="${{ github.ref_name }}" git_hash="${{ github.sha }}" initiated_by="${{ github.triggering_actor }}"
+        tapit image deploy tag="${{ github.ref_name }}" git_hash="${{ github.sha }}" initiator="${{ github.triggering_actor }}"
