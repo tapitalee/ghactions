@@ -5,10 +5,9 @@ inputs:
   tapit-token:
     description: 'Tapit authentication token'
     required: true
-  background:
-    description: 'Run task in background (adds --wait if false)'
-    required: false
-    default: 'true'
+  command:
+    description: 'Command'
+    required: true
   memory:
     description: 'Memory allocation in GB'
     required: false
@@ -29,4 +28,4 @@ runs:
       env:
         TAPIT_TOKEN: ${{ inputs.tapit-token }}
       run: |
-        tapit create task tag="${{ github.ref_name }}" git_hash="${{ github.sha }}" ${{ inputs.background == 'false' && '--wait' || '' }} memory=${{ inputs.memory }} cpu=${{ inputs.cpu }}
+        tapit create task command="${{ inputs.command }}"  tag="${{ github.ref_name }}" git_hash="${{ github.sha }}" memory="${{ inputs.memory }}" cpu="${{ inputs.cpu }}" -w
