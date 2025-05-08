@@ -9,7 +9,7 @@ runs:
     - name: Download Tapit CLI
       shell: bash
       run: |
-        curl --compressed -o tapit https://tapitalee.s3.us-west-2.amazonaws.com/cli/1/linux_amd64/tapit
+        curl --compressed -o tapit https://tapitalee.s3.us-west-2.amazonaws.com/cli/v1/linux_amd64/tapit
         chmod +x tapit
         mkdir -p $HOME/.local/bin
         mv tapit $HOME/.local/bin/
