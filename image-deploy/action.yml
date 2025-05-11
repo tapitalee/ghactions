@@ -18,3 +18,11 @@ runs:
         TAPIT_TOKEN: ${{ inputs.tapit-token }}
       run: |
         tapit image deploy tag="${{ github.ref_name }}" git_hash="${{ github.sha }}" initiator="${{ github.triggering_actor }}"
+
+    - name: Create deploy summary
+      shell: bash
+      run: |
+        echo "### 🚀 Tapit Image Deploy Summary" >> $GITHUB_STEP_SUMMARY
+        echo "- **Tag**: ${{ github.ref_name }}" >> $GITHUB_STEP_SUMMARY
+        echo "- **Git Hash**: ${{ github.sha }}" >> $GITHUB_STEP_SUMMARY
+        echo "- **Initiator**: ${{ github.triggering_actor }}" >> $GITHUB_STEP_SUMMARY
