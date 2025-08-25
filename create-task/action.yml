@@ -27,6 +27,5 @@ runs:
       shell: bash
       env:
         TAPIT_TOKEN: ${{ inputs.tapit-token }}
-        TAPIT_BASEURL: https://api.staging.tapitalee.click
       run: |
         tapit create task "${{ inputs.command }}" docker_tag="${GITHUB_SHA::16}" memory="${{ inputs.memory }}" cpu="${{ inputs.cpu }}" initiator="${{ github.triggering_actor }}" -w

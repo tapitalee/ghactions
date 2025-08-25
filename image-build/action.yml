@@ -15,7 +15,6 @@ runs:
       shell: bash
       env:
         TAPIT_TOKEN: ${{ inputs.tapit-token }}
-        TAPIT_BASEURL: https://api.staging.tapitalee.click
       run: |
         tapit image build docker_tag="${GITHUB_SHA::16}" tag="${{ github.head_ref || github.ref_name }}" git_hash="${{ github.sha }}" initiator="${{ github.triggering_actor }}"
 
