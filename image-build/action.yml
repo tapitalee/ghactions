@@ -11,18 +11,17 @@ runs:
   steps:
     - name: Setup Tapit CLI
       uses: tapitalee/ghactions/setup-tapit@main
-      
     - name: Build Image
       shell: bash
       env:
         TAPIT_TOKEN: ${{ inputs.tapit-token }}
       run: |
-        tapit image build tag="${{ github.ref_name }}" git_hash="${{ github.sha }}" initiator="${{ github.triggering_actor }}"
+        tapit image build docker_tag="${GITHUB_SHA::16}" tag="${{ github.head_ref || github.ref_name }}" git_hash="${{ github.sha }}" initiator="${{ github.triggering_actor }}"
 
     - name: Create build summary
       shell: bash
       run: |
         echo "### 🛠️ Tapit Image Build Summary" >> $GITHUB_STEP_SUMMARY
-        echo "- **Tag**: ${{ github.ref_name }}" >> $GITHUB_STEP_SUMMARY
+        echo "- **Tag**: ${{ github.head_ref || github.ref_name }}" >> $GITHUB_STEP_SUMMARY
         echo "- **Git Hash**: ${{ github.sha }}" >> $GITHUB_STEP_SUMMARY
         echo "- **Initiator**: ${{ github.triggering_actor }}" >> $GITHUB_STEP_SUMMARY
