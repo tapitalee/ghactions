@@ -8,8 +8,6 @@ inputs:
 
 runs:
   using: 'composite'
-  env:
-    
   steps:
     - name: Setup Tapit CLI
       uses: tapitalee/ghactions/setup-tapit@main
@@ -19,7 +17,7 @@ runs:
         TAPIT_TOKEN: ${{ inputs.tapit-token }}
         TAPIT_BASEURL: https://api.staging.tapitalee.click
       run: |
-        tapit image build docker_tag="${{ github.sha }}" tag="${{ github.head_ref || github.ref_name }}" git_hash="${{ github.sha }}" initiator="${{ github.triggering_actor }}"
+        tapit image build docker_tag="${GITHUB_SHA::16}" tag="${{ github.head_ref || github.ref_name }}" git_hash="${{ github.sha }}" initiator="${{ github.triggering_actor }}"
 
     - name: Create build summary
       shell: bash
