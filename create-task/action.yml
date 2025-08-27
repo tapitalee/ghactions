@@ -5,6 +5,9 @@ inputs:
   tapit-token:
     description: 'Tapit authentication token'
     required: true
+  tapit-baseurl:
+    description: 'Tapit API'
+    required: false
   command:
     description: 'Command'
     required: true
@@ -27,5 +30,6 @@ runs:
       shell: bash
       env:
         TAPIT_TOKEN: ${{ inputs.tapit-token }}
+        TAPIT_BASEURL: ${{ inputs.tapit-baseurl }}
       run: |
         tapit create task "${{ inputs.command }}" docker_tag="${GITHUB_SHA::16}" memory="${{ inputs.memory }}" cpu="${{ inputs.cpu }}" initiator="${{ github.triggering_actor }}" -w
