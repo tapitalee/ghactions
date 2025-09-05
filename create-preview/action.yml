@@ -1,5 +1,5 @@
-name: 'Create Task with Tapit'
-description: 'Create background task using Tapit CLI'
+name: 'Create Preview app'
+description: 'Create a Preview app'
 author: 'Tapitalee'
 inputs:
   tapit-token:
@@ -8,22 +8,17 @@ inputs:
   tapit-baseurl:
     description: 'Tapit API'
     required: false
-  command:
-    description: 'Command'
+  preview_app_name:
+    description: 'Preview app name'
     required: true
-  memory:
-    description: 'Memory allocation in GB'
-    required: false
-    default: '2'
-  cpu:
-    description: 'CPU allocation in cores'
-    required: false
-    default: '0.25'
-  docker_tag:
-    description: 'Docker tag to use (defaults to short SHA if not set)'
+  delete_in_days:
+    description: 'Expire (delete) app after this many days'
     required: false
   app_name:
     description: "Name of the Tapitalee app to use, defaults to that app linked to using a deploy token"
+    required: false
+  domain:
+    description: "Optional domain name to attach to preview app"
     required: false
 
 runs:
@@ -32,17 +27,19 @@ runs:
     - name: Setup Tapit CLI
       uses: tapitalee/ghactions/setup-tapit@main
     - name: Set app name from input
+      shell: bash
       if: ${{ inputs.app_name != '' }}
       run: echo "TAPIT_APP=${{ inputs.app_name }}" >> $GITHUB_ENV
     - name: Set short SHA
       id: sha
       shell: bash
       run: echo "GITHUB_SHA_SHORT=${GITHUB_SHA::16}" >> $GITHUB_ENV
-    - name: Create Task
+    - name: Create Preview app
       shell: bash
       env:
         TAPIT_TOKEN: ${{ inputs.tapit-token }}
         TAPIT_BASEURL: ${{ inputs.tapit-baseurl }}
         DOCKER_TAG: ${{ inputs.docker_tag && inputs.docker_tag || env.GITHUB_SHA_SHORT }}
       run: |
-        tapit create task "${{ inputs.command }}" docker_tag="$DOCKER_TAG" memory="${{ inputs.memory }}" cpu="${{ inputs.cpu }}" initiator="${{ github.triggering_actor }}" -w
+        tapit create preview "${{ inputs.preview_app_name }}" delete_in_days="${{ inputs.delete_in_days }}" domain="${{ inputs.domain }}" --wait
+        echo "hostname=${{ inputs.domain }}" >> "$GITHUB_OUTPUT"

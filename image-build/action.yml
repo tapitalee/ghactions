@@ -8,24 +8,47 @@ inputs:
   tapit-baseurl:
     description: 'Tapit API'
     required: false
+  docker_tag:
+    description: 'Docker tag to use (defaults to short SHA if not set)'
+    required: false
+  app_name:
+    description: "Name of the Tapitalee app to use, defaults to that app linked to using a deploy token"
+    required: false
+  cache:
+    description: 'Cache mode to employ'
+    required: false
+
 
 runs:
   using: 'composite'
   steps:
     - name: Setup Tapit CLI
       uses: tapitalee/ghactions/setup-tapit@main
+    - name: Set app name from input
+      if: ${{ inputs.app_name != '' }}
+      run: echo "TAPIT_APP=${{ inputs.app_name }}" >> $GITHUB_ENV
+    - name: Set short SHA
+      id: sha
+      shell: bash
+      run: |
+        echo "GIT_SHA_SHORT=$(git rev-parse --short=16 HEAD)" >> $GITHUB_ENV
+        if [ "$(git rev-parse HEAD)" == "${{ github.sha }}" ]; then
+          echo "TAPIT_TAG=${{ github.head_ref || github.ref_name }}" >> $GITHUB_ENV
+        fi
     - name: Build Image
       shell: bash
       env:
         TAPIT_TOKEN: ${{ inputs.tapit-token }}
         TAPIT_BASEURL: ${{ inputs.tapit-baseurl }}
+        DOCKER_TAG: ${{ inputs.docker_tag && inputs.docker_tag || env.GIT_SHA_SHORT }}
       run: |
-        tapit image build docker_tag="${GITHUB_SHA::16}" tag="${{ github.head_ref || github.ref_name }}" git_hash="${{ github.sha }}" initiator="${{ github.triggering_actor }}"
+        tapit image build docker_tag="$DOCKER_TAG" tag="$TAPIT_TAG" git_hash=`git rev-parse HEAD` initiator="${{ github.triggering_actor }}" cache=${{ inputs.cache }}
 
     - name: Create build summary
       shell: bash
+      env:
+        DOCKER_TAG: ${{ inputs.docker_tag && inputs.docker_tag || env.GIT_SHA_SHORT }}
       run: |
         echo "### 🛠️ Tapit Image Build Summary" >> $GITHUB_STEP_SUMMARY
-        echo "- **Tag**: ${{ github.head_ref || github.ref_name }}" >> $GITHUB_STEP_SUMMARY
-        echo "- **Docker Tag**: ${GITHUB_SHA::16}" >> $GITHUB_STEP_SUMMARY
+        echo "- **Docker Tag**: $DOCKER_TAG" >> $GITHUB_STEP_SUMMARY
         echo "- **Initiator**: ${{ github.triggering_actor }}" >> $GITHUB_STEP_SUMMARY

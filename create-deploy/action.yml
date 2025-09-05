@@ -1,5 +1,5 @@
-name: 'Build & Deploy Image with Tapit'
-description: 'Builds & deploys a container image using Tapit CLI'
+name: 'Deploy with Tapit'
+description: 'Initiates a deploy of an already uploaded image using Tapit CLI'
 author: 'Tapitalee'
 inputs:
   tapit-token:
@@ -13,9 +13,6 @@ inputs:
     required: false
   app_name:
     description: "Name of the Tapitalee app to use, defaults to that app linked to using a deploy token"
-    required: false
-  cache:
-    description: 'Cache mode to employ'
     required: false
 
 runs:
@@ -35,23 +32,19 @@ runs:
         if [ "$(git rev-parse HEAD)" == "${{ github.sha }}" ]; then
           echo "TAPIT_TAG=${{ github.head_ref || github.ref_name }}" >> $GITHUB_ENV
         fi
-    - name: Deploy or Create Deploy
+    - name: Create Deploy
       shell: bash
       env:
         TAPIT_TOKEN: ${{ inputs.tapit-token }}
         TAPIT_BASEURL: ${{ inputs.tapit-baseurl }}
-        DOCKER_TAG: ${{ inputs.docker_tag != '' && inputs.docker_tag || env.GITHUB_SHA_SHORT }}
+        DOCKER_TAG: ${{ inputs.docker_tag && inputs.docker_tag || env.GITHUB_SHA_SHORT }}
       run: |
-        if tapit show image docker_tag="$DOCKER_TAG" ; then
-          echo "Image exists, creating deploy..."
-          tapit create deploy docker_tag="$DOCKER_TAG" tag="$TAPIT_TAG" git_hash=`git rev-parse HEAD` initiator="${{ github.triggering_actor }}"
-        else
-          echo "Image does not exist, deploying image..."
-          tapit image deploy docker_tag="$DOCKER_TAG" tag="$TAPIT_TAG" git_hash=`git rev-parse HEAD` initiator="${{ github.triggering_actor }}" cache=${{ inputs.cache }}
-        fi
+        tapit create deploy docker_tag="$DOCKER_TAG" tag="$TAPIT_TAG" git_hash=`git rev-parse HEAD` initiator="${{ github.triggering_actor }}"
     - name: Create deploy summary
       shell: bash
+      env:
+        DOCKER_TAG: ${{ inputs.docker_tag && inputs.docker_tag || env.GITHUB_SHA_SHORT }}
       run: |
         echo "### 🚀 Tapit Image Deploy Summary" >> $GITHUB_STEP_SUMMARY
-        echo "- **Docker Tag**: ${{ inputs.docker_tag != '' && inputs.docker_tag || env.GITHUB_SHA_SHORT }}" >> $GITHUB_STEP_SUMMARY
+        echo "- **Docker Tag**: $DOCKER_TAG" >> $GITHUB_STEP_SUMMARY
         echo "- **Initiator**: ${{ github.triggering_actor }}" >> $GITHUB_STEP_SUMMARY

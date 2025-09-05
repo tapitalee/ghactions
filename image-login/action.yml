@@ -1,0 +1,46 @@
+name: 'Image Repository Login'
+description: 'Docker login to the image repository using Tapit CLI'
+author: 'Tapitalee'
+inputs:
+  tapit-token:
+    description: 'Tapit authentication token'
+    required: true
+  tapit-baseurl:
+    description: 'Tapit API'
+    required: false
+  app_name:
+    description: "Name of the Tapitalee app to use, defaults to that app linked to using a deploy token"
+    required: false
+
+runs:
+  using: 'composite'
+  steps:
+    - name: Setup Tapit CLI
+      uses: tapitalee/ghactions/setup-tapit@main
+    - name: Set app name from input
+      shell: bash
+      if: ${{ inputs.app_name != '' }}
+      run: echo "TAPIT_APP=${{ inputs.app_name }}" >> $GITHUB_ENV
+
+    - name: Docker Login
+      shell: bash
+      env:
+        TAPIT_TOKEN: ${{ inputs.tapit-token }}
+        TAPIT_BASEURL: ${{ inputs.tapit-baseurl }}
+      run: |
+        tapit image login
+
+    - name: Get repository URL
+      shell: bash
+      id: getrepo
+      env:
+        TAPIT_TOKEN: ${{ inputs.tapit-token }}
+        TAPIT_BASEURL: ${{ inputs.tapit-baseurl }}
+      run: |
+        echo REPOSITORY_URL=`tapit show ecr` >> $GITHUB_ENV
+        echo repository_url=`tapit show ecr` >> $GITHUB_OUTPUT
+
+outputs:
+  repository_url:
+    description: "The URL of the image repository"
+    value: ${{ steps.getrepo.outputs.repository_url }}
