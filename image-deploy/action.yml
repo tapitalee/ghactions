@@ -12,12 +12,18 @@ runs:
     - name: Setup Tapit CLI
       uses: tapitalee/ghactions/setup-tapit@main
       
-    - name: Deploy Image
+    - name: Deploy or Create Deploy
       shell: bash
       env:
         TAPIT_TOKEN: ${{ inputs.tapit-token }}
       run: |
-        tapit image deploy docker_tag="${GITHUB_SHA::16}" tag="${{ github.head_ref || github.ref_name }}" git_hash="${{ github.sha }}" initiator="${{ github.triggering_actor }}"
+        if tapit show image docker_tag="${GITHUB_SHA::16}" ; then
+          echo "Image exists, creating deploy..."
+          tapit create deploy docker_tag="${GITHUB_SHA::16}" tag="${{ github.head_ref || github.ref_name }}" git_hash="${{ github.sha }}" initiator="${{ github.triggering_actor }}"
+        else
+          echo "Image does not exist, deploying image..."
+          tapit image deploy docker_tag="${GITHUB_SHA::16}" tag="${{ github.head_ref || github.ref_name }}" git_hash="${{ github.sha }}" initiator="${{ github.triggering_actor }}"
+        fi
     - name: Create deploy summary
       shell: bash
       run: |
