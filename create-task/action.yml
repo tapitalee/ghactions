@@ -31,6 +31,7 @@ runs:
     - name: Set app name from input
       if: ${{ inputs.app_name != '' }}
       run: echo "TAPIT_APP=${{ inputs.app_name }}" >> $GITHUB_ENV
+      shell: bash
     - name: Set short SHA
       id: sha
       shell: bash

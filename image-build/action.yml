@@ -24,6 +24,7 @@ runs:
     - name: Setup Tapit CLI
       uses: tapitalee/ghactions/setup-tapit@main
     - name: Set app name from input
+      shell: bash
       if: ${{ inputs.app_name != '' }}
       run: echo "TAPIT_APP=${{ inputs.app_name }}" >> $GITHUB_ENV
     - name: Set short SHA
