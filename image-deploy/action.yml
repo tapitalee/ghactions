@@ -14,6 +14,9 @@ inputs:
   app_name:
     description: "Name of the Tapitalee app to use, defaults to that app linked to using a deploy token"
     required: false
+  dockerfile:
+    description: "Path to dockerfile to use for build"
+    required: false
   cache:
     description: 'Cache mode to employ'
     required: false
@@ -47,7 +50,7 @@ runs:
           tapit create deploy docker_tag="$DOCKER_TAG" tag="$TAPIT_TAG" git_hash=`git rev-parse HEAD` initiator="${{ github.triggering_actor }}"
         else
           echo "Image does not exist, deploying image..."
-          tapit image deploy docker_tag="$DOCKER_TAG" tag="$TAPIT_TAG" git_hash=`git rev-parse HEAD` initiator="${{ github.triggering_actor }}" cache=${{ inputs.cache }}
+          tapit image deploy docker_tag="$DOCKER_TAG" tag="$TAPIT_TAG" git_hash=`git rev-parse HEAD` initiator="${{ github.triggering_actor }}" cache=${{ inputs.cache }} dockerfile="${{ inputs.dockerfile }}"
         fi
     - name: Create deploy summary
       shell: bash
