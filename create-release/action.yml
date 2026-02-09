@@ -1,0 +1,76 @@
+name: 'Create Release with Tapit'
+description: 'Creates a release using Tapit CLI'
+author: 'Tapitalee'
+inputs:
+  tapit-token:
+    description: 'Tapit authentication token'
+    required: true
+  tapit-baseurl:
+    description: 'Tapit API'
+    required: false
+  docker_tag:
+    description: 'Docker tag to use (defaults to short SHA if not set)'
+    required: false
+  git_hash:
+    description: 'Git hash to associate with the release (defaults to current HEAD)'
+    required: false
+  git_tag:
+    description: 'Git tag to associate with the release'
+    required: false
+  app_name:
+    description: "Name of the Tapitalee app to use, defaults to that app linked to using a deploy token"
+    required: false
+  release_notes:
+    description: 'Multi-line release notes to import (optional)'
+    required: false
+
+runs:
+  using: 'composite'
+  steps:
+    - name: Setup Tapit CLI
+      uses: tapitalee/ghactions/setup-tapit@main
+    - name: Set app name from input
+      if: ${{ inputs.app_name != '' }}
+      run: echo "TAPIT_APP=${{ inputs.app_name }}" >> $GITHUB_ENV
+      shell: bash
+    - name: Set short SHA
+      id: sha
+      shell: bash
+      run: |
+        echo "GIT_SHA_SHORT=$(git rev-parse --short=16 HEAD)" >> $GITHUB_ENV
+    - name: Create Release
+      shell: bash
+      env:
+        TAPIT_TOKEN: ${{ inputs.tapit-token }}
+        TAPIT_BASEURL: ${{ inputs.tapit-baseurl }}
+        DOCKER_TAG: ${{ inputs.docker_tag && inputs.docker_tag || env.GIT_SHA_SHORT }}
+        GIT_HASH: ${{ inputs.git_hash }}
+        GIT_TAG: ${{ inputs.git_tag }}
+      run: |
+        CMD="tapit create release docker_tag=\"$DOCKER_TAG\""
+        if [ -n "$GIT_HASH" ]; then
+          CMD="$CMD git_hash=\"$GIT_HASH\""
+        fi
+        if [ -n "$GIT_TAG" ]; then
+          CMD="$CMD git_tag=\"$GIT_TAG\""
+        fi
+        eval $CMD
+    - name: Import release notes
+      if: ${{ inputs.release_notes != '' }}
+      shell: bash
+      env:
+        TAPIT_TOKEN: ${{ inputs.tapit-token }}
+        TAPIT_BASEURL: ${{ inputs.tapit-baseurl }}
+        DOCKER_TAG: ${{ inputs.docker_tag && inputs.docker_tag || env.GIT_SHA_SHORT }}
+        RELEASE_NOTES: ${{ inputs.release_notes }}
+      run: |
+        echo "$RELEASE_NOTES" > /tmp/release_notes.txt
+        tapit import release_notes docker_tag="$DOCKER_TAG" < /tmp/release_notes.txt
+    - name: Create release summary
+      shell: bash
+      env:
+        DOCKER_TAG: ${{ inputs.docker_tag && inputs.docker_tag || env.GIT_SHA_SHORT }}
+      run: |
+        echo "### 📦 Tapit Release Summary" >> $GITHUB_STEP_SUMMARY
+        echo "- **Docker Tag**: $DOCKER_TAG" >> $GITHUB_STEP_SUMMARY
+        echo "- **Initiator**: ${{ github.triggering_actor }}" >> $GITHUB_STEP_SUMMARY
