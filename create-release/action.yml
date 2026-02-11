@@ -23,6 +23,12 @@ inputs:
   release_notes:
     description: 'Multi-line release notes to import (optional)'
     required: false
+  diff_url:
+    description: 'URL to the diff for this release (optional)'
+    required: false
+  release_url:
+    description: 'URL to the release page (optional)'
+    required: false
 
 runs:
   using: 'composite'
@@ -53,6 +59,12 @@ runs:
         fi
         if [ -n "$GIT_TAG" ]; then
           CMD="$CMD git_tag=\"$GIT_TAG\""
+        fi
+        if [ -n "${{ inputs.diff_url }}" ]; then
+          CMD="$CMD diff_url=\"${{ inputs.diff_url }}\""
+        fi
+        if [ -n "${{ inputs.release_url }}" ]; then
+          CMD="$CMD release_url=\"${{ inputs.release_url }}\""
         fi
         eval $CMD
     - name: Import release notes
