@@ -1,0 +1,30 @@
+name: 'Wait for Addons'
+description: 'Waits for all addons to be ready using Tapit CLI'
+author: 'Tapitalee'
+inputs:
+  tapit-token:
+    description: 'Tapit authentication token'
+    required: true
+  tapit-baseurl:
+    description: 'Tapit API'
+    required: false
+  app_name:
+    description: "Name of the Tapitalee app to use, defaults to that app linked to using a deploy token"
+    required: false
+
+runs:
+  using: 'composite'
+  steps:
+    - name: Setup Tapit CLI
+      uses: tapitalee/ghactions/setup-tapit@main
+    - name: Set app name from input
+      if: ${{ inputs.app_name != '' }}
+      run: echo "TAPIT_APP=${{ inputs.app_name }}" >> $GITHUB_ENV
+      shell: bash
+    - name: Wait for Addons
+      shell: bash
+      env:
+        TAPIT_TOKEN: ${{ inputs.tapit-token }}
+        TAPIT_BASEURL: ${{ inputs.tapit-baseurl }}
+      run: |
+        tapit list addons --wait
