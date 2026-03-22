@@ -9,8 +9,15 @@ runs:
     - name: Download Tapit CLI
       shell: bash
       run: |
-        curl -s --compressed -o tapit https://tapitalee.s3.us-west-2.amazonaws.com/cli/v2/linux_amd64/tapit
+        curl -s --compressed -o tapit https://tapitalee.s3.us-west-2.amazonaws.com/cli/v5/linux_amd64/tapit
         chmod +x tapit
         mkdir -p $HOME/.local/bin
         mv tapit $HOME/.local/bin/
         echo "$HOME/.local/bin" >> $GITHUB_PATH
+
+    - name: Download Socify CLI
+      shell: bash
+      run: |
+        curl -s --compressed -o socify https://tapitalee.s3.us-west-2.amazonaws.com/cli/v5/linux_amd64/socify
+        chmod +x socify
+        mv socify $HOME/.local/bin/
