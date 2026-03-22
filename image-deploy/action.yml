@@ -51,6 +51,7 @@ runs:
         else
           echo "Image does not exist, deploying image..."
           tapit image deploy docker_tag="$DOCKER_TAG" tag="$TAPIT_TAG" git_hash=`git rev-parse HEAD` initiator="${{ github.triggering_actor }}" cache=${{ inputs.cache }} dockerfile="${{ inputs.dockerfile }}"
+          socify `tapit show ecr`:$DOCKER_TAG
         fi
     - name: Create deploy summary
       shell: bash

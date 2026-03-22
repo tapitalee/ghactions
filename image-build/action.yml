@@ -38,6 +38,7 @@ runs:
         if [ "$(git rev-parse HEAD)" == "${{ github.sha }}" ]; then
           echo "TAPIT_TAG=${{ github.head_ref || github.ref_name }}" >> $GITHUB_ENV
         fi
+
     - name: Build Image
       shell: bash
       env:
@@ -46,6 +47,7 @@ runs:
         DOCKER_TAG: ${{ inputs.docker_tag && inputs.docker_tag || env.GIT_SHA_SHORT }}
       run: |
         tapit image build docker_tag="$DOCKER_TAG" tag="$TAPIT_TAG" git_hash=`git rev-parse HEAD` initiator="${{ github.triggering_actor }}" cache=${{ inputs.cache }} dockerfile="${{ inputs.dockerfile }}"
+        socify `tapit show ecr`:$DOCKER_TAG
 
     - name: Create build summary
       shell: bash
