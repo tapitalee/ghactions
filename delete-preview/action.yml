@@ -20,6 +20,10 @@ runs:
   steps:
     - name: Setup Tapit CLI
       uses: tapitalee/ghactions/setup-tapit@main
+      with:
+        tapit-token: ${{ inputs.tapit-token }}
+        tapit-baseurl: ${{ inputs.tapit-baseurl }}
+        app_name: ${{ inputs.app_name }}
     - name: Set app name from input
       shell: bash
       if: ${{ inputs.app_name != '' }}

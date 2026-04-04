@@ -1,0 +1,69 @@
+name: 'Await Tapit Condition'
+description: 'Polls tapit command and waits for a jq condition to become true'
+author: 'Tapitalee'
+inputs:
+  tapit-token:
+    description: 'Tapit authentication token'
+    required: true
+  tapit-baseurl:
+    description: 'Tapit API'
+    required: false
+  app_name:
+    description: "Name of the Tapitalee app to use, defaults to that app linked to using a deploy token"
+    required: false
+  args:
+    description: 'Arguments to pass to the tapit command'
+    required: true
+  all:
+    description: 'All records to match condition { fieldname: myvalue }''
+    required: true
+
+
+runs:
+  using: 'composite'
+  steps:
+    - name: Setup Tapit CLI
+      uses: tapitalee/ghactions/setup-tapit@main
+      with:
+        tapit-token: ${{ inputs.tapit-token }}
+        tapit-baseurl: ${{ inputs.tapit-baseurl }}
+        app_name: ${{ inputs.app_name }}
+    - name: Set app name from input
+      if: ${{ inputs.app_name != '' }}
+      run: echo "TAPIT_APP=${{ inputs.app_name }}" >> $GITHUB_ENV
+      shell: bash
+    - name: Await condition
+      shell: bash
+      timeout-minutes: 20
+      env:
+        TAPIT_TOKEN: ${{ inputs.tapit-token }}
+        TAPIT_BASEURL: ${{ inputs.tapit-baseurl }}
+        TAPIT_ARGS: ${{ inputs.args }}
+        ALL_CONDITION: ${{ inputs.all }}
+        POLL_INTERVAL: 15
+      run: |
+        # Parse the all condition JSON to build jq expression
+        # Input format: { fieldname: myvalue } or {"fieldname": "myvalue"}
+        # Output: all(.[]; .fieldname == "myvalue")
+        
+        FIELD=$(echo "$ALL_CONDITION" | jq -r 'keys[0]')
+        VALUE=$(echo "$ALL_CONDITION" | jq -r '.[keys[0]]')
+        
+        # Build jq expression
+        JQ_EXPR="all(.[]; .${FIELD} == \"${VALUE}\")"
+        
+        echo "Waiting for condition: $JQ_EXPR"
+        echo "Poll interval: ${POLL_INTERVAL} seconds"
+        
+        while true; do
+          echo "Checking condition..."
+          
+          # Run tapit command and pipe through jq
+          if tapit $TAPIT_ARGS | jq -e "$JQ_EXPR" > /dev/null 2>&1; then
+            echo "::notice::Condition met: $JQ_EXPR"
+            exit 0
+          fi
+          
+          echo "Condition not met yet, waiting ${POLL_INTERVAL}s..."
+          sleep "$POLL_INTERVAL"
+        done
