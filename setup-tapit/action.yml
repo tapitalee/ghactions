@@ -21,7 +21,7 @@ runs:
     - name: Download Tapit CLI
       shell: bash
       run: |
-        curl -s --compressed -o tapit https://tapitalee.s3.us-west-2.amazonaws.com/cli/v5/linux_amd64/tapit
+        curl -s --compressed -o tapit https://tapitalee.s3.us-west-2.amazonaws.com/cli/v7/linux_amd64/tapit
         chmod +x tapit
         mkdir -p $HOME/.local/bin
         mv tapit $HOME/.local/bin/
@@ -30,7 +30,7 @@ runs:
     - name: Download Socify CLI
       shell: bash
       run: |
-        curl -s --compressed -o socify https://tapitalee.s3.us-west-2.amazonaws.com/cli/v5/linux_amd64/socify
+        curl -s --compressed -o socify https://tapitalee.s3.us-west-2.amazonaws.com/cli/v7/linux_amd64/socify
         chmod +x socify
         mv socify $HOME/.local/bin/
 
@@ -45,4 +45,4 @@ runs:
         TAPIT_TOKEN: ${{ inputs.tapit-token }}
         TAPIT_BASEURL: ${{ inputs.tapit-baseurl }}
       run: |
-        tapit status
+        tapit -o table status
