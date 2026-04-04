@@ -21,3 +21,11 @@ runs:
         curl -s --compressed -o socify https://tapitalee.s3.us-west-2.amazonaws.com/cli/v5/linux_amd64/socify
         chmod +x socify
         mv socify $HOME/.local/bin/
+
+    - name: Status check
+      shell: bash
+      env:
+        TAPIT_TOKEN: ${{ inputs.tapit-token }}
+        TAPIT_BASEURL: ${{ inputs.tapit-baseurl }}
+      run: |
+        tapit status
